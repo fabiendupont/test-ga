@@ -1,0 +1,1 @@
+{ "versions": [ { "rhel": "8.6", "ubi-digest": "sha256:08e221b041a95e6840b208c618ae56c27e3429c3dad637ece01c9b471cc8fac6", "kernel": "4.18.0-372.19.1.el8_6", "driver": "1.4.1-11", "arch": "linux/amd64", "arch_tag": "x86_64" } ] }

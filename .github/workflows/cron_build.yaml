@@ -1,0 +1,46 @@
+---
+name: Build Habana AI Driver container images
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout current repository to get the matrix file
+        uses: actions/checkout@v3
+
+      - name: Generate the build matrix
+        id: gen-matrix
+        run: |
+          echo "${PULL_SECRET}" > ${PULL_SECRET_FILE}
+          # ./build-matrix.sh
+          matrix=`cat ./build-matrix.json`
+          #echo "${matrix}"
+          #echo "${matrix}" | jq
+          echo "::add-mask::matrix"
+          echo "::echo::off"
+          echo "::set-output name=matrix::${matrix}"
+          #echo "::set-output name=matrix::$(cat ./build-matrix.json)"
+          #echo "::set-output name=matrix::$(MATRIX_FILE=/proc/self/fd/1 bash build-matrix.sh)"
+        env:
+          PULL_SECRET: ${{ secrets.PULL_SECRET }}
+          PULL_SECRET_FILE: pull-secret
+
+  build-image:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      max-parallel: 4
+      fail-fast: false
+    steps:
+      - name: Debug matrix data
+        run: echo "Habana AI Driver ${{matrix.versions.driver }}-${{ matrix.versions.kernel }}.${{ matrix.versions.arch_tag }}"
